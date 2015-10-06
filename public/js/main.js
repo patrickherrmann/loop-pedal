@@ -54,13 +54,13 @@
             recordButton.disabled = true;
             loopButton.disabled = false;
 
-            nodes.recorder.recording = true;
+            nodes.recorder.start();
         };
 
         loopButton.onclick = function() {
             loopButton.disabled = true;
 
-            nodes.recorder.recording = false;
+            nodes.recorder.stop();
 
             nodes.recordedLoop = ctx.audio.createBufferSource();
             nodes.recordedLoop.buffer = nodes.recorder.createBufferFromRecording();

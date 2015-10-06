@@ -21,17 +21,11 @@ window.audioGraph = (function(audioGraph) {
     }
 
     audioGraph.createRecorder = function(ac) {
+
         var node = ac.createScriptProcessor(
             PROCESSOR_BUFFER_SIZE,
             STERIO_CHANNEL_COUNT,
             STERIO_CHANNEL_COUNT);
-
-        node.recording = false;
-        node.recLen = 0;
-        node.chunks = [
-            [],
-            []
-        ];
 
         node.onaudioprocess = function(e) {
 
@@ -47,15 +41,8 @@ window.audioGraph = (function(audioGraph) {
             node.recLen += input.length;
         };
 
-        node.fuseChunks = function(chunks, channel) {
-            var offset = 0;
-            for (var i = 0; i < chunks.length; i++) {
-                channel.set(chunks[i], offset);
-                offset += chunks[i].length;
-            }
-        };
-
         node.createBufferFromRecording = function() {
+
             var buffer = ac.createBuffer(
                 STERIO_CHANNEL_COUNT,
                 node.recLen,
@@ -63,18 +50,46 @@ window.audioGraph = (function(audioGraph) {
 
             for (var c = 0; c < STERIO_CHANNEL_COUNT; c++) {
                 var channel = buffer.getChannelData(c);
-                node.fuseChunks(node.chunks[c], channel);
+                fuseChunks(node.chunks[c], channel);
             }
             return buffer;
         };
 
+        node.clear = function() {
+            node.recording = false;
+            node.recLen = 0;
+            node.chunks = [
+                [],
+                []
+            ];
+        }
+
+        node.start = function() {
+            node.recording = true;
+        }
+
+        node.stop = function() {
+            node.recording = false;
+        }
+
+        function fuseChunks(chunks, channel) {
+            var offset = 0;
+            for (var i = 0; i < chunks.length; i++) {
+                channel.set(chunks[i], offset);
+                offset += chunks[i].length;
+            }
+        }
+
         // This is a workaround for a chrome bug
         node.connect(ac.destination);
+
+        node.clear();
 
         return node;
     }
 
     audioGraph.createGainMonitor = function(ac) {
+
         var node = ac.createScriptProcessor(
             PROCESSOR_BUFFER_SIZE,
             STERIO_CHANNEL_COUNT,
