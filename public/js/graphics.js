@@ -35,14 +35,17 @@ window.graphics = (function(graphics) {
     graphics.GAIN_METER_HEIGHT = 200;
 
     graphics.drawGainMeter = function(g, gainMonitor) {
+
+        var gain = gainMonitor.getCurrentGain();
+
         g.fillStyle = "#000000";
         g.fillRect(0, 0, graphics.GAIN_METER_WIDTH, graphics.GAIN_METER_HEIGHT);
 
-        var leftHeight = graphics.GAIN_METER_HEIGHT * gainMonitor.currentGain[0];
+        var leftHeight = graphics.GAIN_METER_HEIGHT * gain[0];
         g.fillStyle = "#00cc00";
         g.fillRect(0, graphics.GAIN_METER_HEIGHT - leftHeight, graphics.GAIN_METER_WIDTH / 2, leftHeight);
 
-        var rightHeight = graphics.GAIN_METER_HEIGHT * gainMonitor.currentGain[1];
+        var rightHeight = graphics.GAIN_METER_HEIGHT * gain[1];
         g.fillStyle = "#00cc00";
         g.fillRect(graphics.GAIN_METER_WIDTH / 2, graphics.GAIN_METER_HEIGHT - rightHeight, graphics.GAIN_METER_WIDTH / 2, rightHeight);
     }

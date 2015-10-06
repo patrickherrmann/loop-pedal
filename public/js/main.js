@@ -4,10 +4,9 @@
     var nodes = {};
 
     function init() {
+
         fixVendorPrefixes();
-
         setupCanvases();
-
         ctx.audio = new window.AudioContext();
 
         var mediaRequest = {

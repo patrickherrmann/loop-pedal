@@ -95,18 +95,29 @@ window.audioGraph = (function(audioGraph) {
             STERIO_CHANNEL_COUNT,
             STERIO_CHANNEL_COUNT);
 
-        node.currentGain = [0, 0];
+        node.currentChunk = [];
+        node.chunkSize = 0;
 
         node.onaudioprocess = function(e) {
             var input = e.inputBuffer;
+            node.chunkSize = input.length;
             for (var c = 0; c < STERIO_CHANNEL_COUNT; c++) {
-                var channelData = input.getChannelData(c);
-                var total = 0;
-                for (var i = 0; i < PROCESSOR_BUFFER_SIZE; i += 10) {
-                    total += Math.abs(channelData[i]);
-                }
-                node.currentGain[c] = total / (PROCESSOR_BUFFER_SIZE / 10);
+                node.currentChunk[c] = input.getChannelData(c);
             }
+        };
+
+        node.getCurrentGain = function() {
+            var gain = [];
+            for (var c = 0; c < STERIO_CHANNEL_COUNT; c++) {
+                var total = 0;
+                var channelChunk = node.currentChunk[c];
+                for (var i = 0; i < node.chunkSize; i += 10) {
+                    total += Math.abs(channelChunk[i]);
+                }
+                gain[c] = total / (node.chunkSize / 10);
+            }
+
+            return gain;
         };
 
         // This is a workaround for a chrome bug
