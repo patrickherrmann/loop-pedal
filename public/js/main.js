@@ -6,23 +6,18 @@
     function init() {
         fixVendorPrefixes();
 
+        setupCanvases();
+
         ctx.audio = new window.AudioContext();
 
-        var oscCanvas = document.querySelector("#oscilloscope");
-        ctx.oscCanvas = oscCanvas.getContext("2d");
-
-        var gainCanvas = document.querySelector("#gainMeter");
-        ctx.gainCanvas = gainCanvas.getContext("2d");
-
-        navigator.getUserMedia({
+        var mediaRequest = {
             audio: true
-        }, setupMicrophoneStream, function(e) {
-            alert('Error getting audio');
-            console.log(e);
-        });
+        };
+
+        navigator.getUserMedia(mediaRequest, setupMicStream, handleMicRejection);
     }
 
-    function setupMicrophoneStream(stream) {
+    function setupMicStream(stream) {
 
         nodes.mic = ctx.audio.createMediaStreamSource(stream);
         nodes.speakers = ctx.audio.destination;
@@ -43,6 +38,18 @@
         setupButtonListeners();
 
         requestAnimationFrame(renderFrame);
+    }
+
+    function setupCanvases() {
+        var oscCanvas = document.querySelector("#oscilloscope");
+        oscCanvas.width = graphics.OSC_WIDTH;
+        oscCanvas.height = graphics.OSC_HEIGHT;
+        ctx.oscCanvas = oscCanvas.getContext("2d");
+
+        var gainCanvas = document.querySelector("#gainMeter");
+        gainCanvas.width = graphics.GAIN_METER_WIDTH;
+        gainCanvas.height = graphics.GAIN_METER_HEIGHT;
+        ctx.gainCanvas = gainCanvas.getContext("2d");
     }
 
     function setupButtonListeners() {
@@ -79,6 +86,11 @@
 
         graphics.drawOscilloscope(ctx.oscCanvas, nodes.analyser);
         graphics.drawGainMeter(ctx.gainCanvas, nodes.gainMonitor);
+    }
+
+    function handleMicRejection(err) {
+        alert("This demo won't do anything without microphone access!");
+        console.error(err);
     }
 
     function fixVendorPrefixes() {
