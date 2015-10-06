@@ -5,8 +5,6 @@ var gainCtx;
 var analyser;
 var recorder;
 var gainMonitor;
-var freqDataArray;
-var currentGain;
 
 var OSC_WIDTH = 500;
 var OSC_HEIGHT = 200;
@@ -33,8 +31,10 @@ function drawOscilloscope() {
     oscCtx.beginPath();
     oscCtx.moveTo(0, OSC_HEIGHT_MID);
 
+    var data = analyser.freqDataArray;
+
     for (var i = 0; i < FREQ_BIN_COUNT; i++) {
-        var f = freqDataArray[i];
+        var f = data[i];
         var h = OSC_HEIGHT_MID - (f - 128) * (OSC_HEIGHT_MID / 128);
         oscCtx.lineTo(FREQ_WIDTH * (i + 1), h);
     }
@@ -47,17 +47,17 @@ function drawGainMeter() {
     gainCtx.fillStyle = "#000000";
     gainCtx.fillRect(0, 0, GAIN_WIDTH, GAIN_HEIGHT);
 
-    var leftHeight = GAIN_HEIGHT * currentGain[0];
+    var leftHeight = GAIN_HEIGHT * gainMonitor.currentGain[0];
     gainCtx.fillStyle = "#00cc00";
     gainCtx.fillRect(0, GAIN_HEIGHT - leftHeight, GAIN_WIDTH / 2, leftHeight);
 
-    var rightHeight = GAIN_HEIGHT * currentGain[1];
+    var rightHeight = GAIN_HEIGHT * gainMonitor.currentGain[1];
     gainCtx.fillStyle = "#00cc00";
     gainCtx.fillRect(GAIN_WIDTH / 2, GAIN_HEIGHT - rightHeight, GAIN_WIDTH / 2, rightHeight);
 }
 
 function renderFrame() {
-    analyser.getByteTimeDomainData(freqDataArray);
+    analyser.getByteTimeDomainData(analyser.freqDataArray);
 
     drawOscilloscope();
     drawGainMeter();
@@ -69,7 +69,10 @@ function renderFrame() {
 
 function createAnalyser() {
     var node = audCtx.createAnalyser();
+
     node.fftSize = FFT_SIZE;
+    node.freqDataArray = new Uint8Array(FREQ_BIN_COUNT);
+
     return node;
 }
 
@@ -130,6 +133,8 @@ function createGainMonitor() {
         STERIO_CHANNEL_COUNT,
         STERIO_CHANNEL_COUNT);
 
+    node.currentGain = [0, 0];
+
     node.onaudioprocess = function(e) {
         var input = e.inputBuffer;
         for (var c = 0; c < STERIO_CHANNEL_COUNT; c++) {
@@ -138,7 +143,7 @@ function createGainMonitor() {
             for (var i = 0; i < PROCESSOR_BUFFER_SIZE; i += 10) {
                 total += Math.abs(channelData[i]);
             }
-            currentGain[c] = total / (PROCESSOR_BUFFER_SIZE / 10);
+            node.currentGain[c] = total / (PROCESSOR_BUFFER_SIZE / 10);
         }
     };
 
@@ -188,13 +193,12 @@ function processStream(stream) {
     source.connect(gainMonitor);
     source.connect(recorder);
 
-    gainMonitor.connect(dest); // Due to chrome bug
-    recorder.connect(dest); // Due to chrome bug
+    // These connections don't do anything
+    // but are necessary due to a chrome bug
+    gainMonitor.connect(dest);
+    recorder.connect(dest);
 
     //source.connect(dest); // Monitoring
-
-    freqDataArray = new Uint8Array(FREQ_BIN_COUNT);
-    currentGain = [0, 0];
 
     setupButtonListeners();
 
