@@ -1,0 +1,27 @@
+{
+  "name": "loop-pedal",
+  "version": "0.0.0",
+  "description": "An online loop pedal proof of concept.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patrickherrmann/loop-pedal.git"
+  },
+  "keywords": [
+    "loop",
+    "pedal",
+    "audio"
+  ],
+  "author": "Patrick Herrmann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/patrickherrmann/loop-pedal/issues"
+  },
+  "homepage": "https://github.com/patrickherrmann/loop-pedal",
+  "dependencies": {
+    "express": "^4.13.3"
+  }
+}
