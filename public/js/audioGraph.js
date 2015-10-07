@@ -1,7 +1,7 @@
 window.audioGraph = (function(audioGraph) {
 
     var SAMPLE_RATE = 44100;
-    var FFT_SIZE = 512;
+    var FFT_SIZE = 1024;
     var PROCESSOR_BUFFER_SIZE = 4096;
     var STERIO_CHANNEL_COUNT = 2;
 

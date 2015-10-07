@@ -2,7 +2,7 @@ window.graphics = (function(graphics) {
 
     /* Oscilloscope */
 
-    graphics.OSC_WIDTH = 500;
+    graphics.OSC_WIDTH = 1000;
     graphics.OSC_HEIGHT = 200;
     var OSC_HEIGHT_MID = graphics.OSC_HEIGHT / 2;
 
@@ -31,7 +31,7 @@ window.graphics = (function(graphics) {
 
     /* Frequency Graph */
 
-    graphics.FREQ_WIDTH = 500;
+    graphics.FREQ_WIDTH = 1000;
     graphics.FREQ_HEIGHT = 200;
 
     graphics.drawFrequencyGraph = function(g, analyser) {
