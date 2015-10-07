@@ -80,7 +80,7 @@ window.audioGraph = (function(audioGraph) {
             }
         }
 
-        // This is a workaround for a chrome bug
+        // Workaround for chrome bug https://crbug.com/327649
         node.connect(ac.destination);
 
         node.clear();
@@ -120,7 +120,7 @@ window.audioGraph = (function(audioGraph) {
             return gain;
         };
 
-        // This is a workaround for a chrome bug
+        // Workaround for chrome bug https://crbug.com/327649
         node.connect(ac.destination);
 
         return node;
