@@ -10,12 +10,16 @@ window.audioGraph = (function(audioGraph) {
         var node = ac.createAnalyser();
 
         node.fftSize = FFT_SIZE;
-        node.freqDataArray = new Uint8Array(node.frequencyBinCount);
+        node.freqData = new Uint8Array(node.frequencyBinCount);
+        node.timeData = new Uint8Array(node.fftSize);
 
-        node.getFrequencyData = function() {
-            node.getByteTimeDomainData(node.freqDataArray);
-            return node.freqDataArray;
-        };
+        node.measureGain = function() {
+            var total = 0;
+            for (var i = 0; i < node.fftSize; i += 10) {
+                total += Math.abs(node.timeData[i] - 128);
+            }
+            return (total / 128) * (10 / node.fftSize);
+        }
 
         return node;
     }
@@ -84,44 +88,6 @@ window.audioGraph = (function(audioGraph) {
         node.connect(ac.destination);
 
         node.clear();
-
-        return node;
-    }
-
-    audioGraph.createGainMonitor = function(ac) {
-
-        var node = ac.createScriptProcessor(
-            PROCESSOR_BUFFER_SIZE,
-            STERIO_CHANNEL_COUNT,
-            STERIO_CHANNEL_COUNT);
-
-        node.currentChunk = [];
-        node.chunkSize = 0;
-
-        node.onaudioprocess = function(e) {
-            var input = e.inputBuffer;
-            node.chunkSize = input.length;
-            for (var c = 0; c < STERIO_CHANNEL_COUNT; c++) {
-                node.currentChunk[c] = input.getChannelData(c);
-            }
-        };
-
-        node.getCurrentGain = function() {
-            var gain = [];
-            for (var c = 0; c < STERIO_CHANNEL_COUNT; c++) {
-                var total = 0;
-                var channelChunk = node.currentChunk[c];
-                for (var i = 0; i < node.chunkSize; i += 10) {
-                    total += Math.abs(channelChunk[i]);
-                }
-                gain[c] = total / (node.chunkSize / 10);
-            }
-
-            return gain;
-        };
-
-        // Workaround for chrome bug https://crbug.com/327649
-        node.connect(ac.destination);
 
         return node;
     }

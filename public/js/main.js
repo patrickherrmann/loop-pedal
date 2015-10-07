@@ -22,11 +22,9 @@
         nodes.speakers = ctx.audio.destination;
 
         nodes.analyser = audioGraph.createAnalyser(ctx.audio);
-        nodes.gainMonitor = audioGraph.createGainMonitor(ctx.audio);
         nodes.recorder = audioGraph.createRecorder(ctx.audio);
 
         nodes.mic.connect(nodes.analyser);
-        nodes.mic.connect(nodes.gainMonitor);
         nodes.mic.connect(nodes.recorder);
 
         // Uncomment to monitor mic input
@@ -44,6 +42,11 @@
         oscCanvas.width = graphics.OSC_WIDTH;
         oscCanvas.height = graphics.OSC_HEIGHT;
         ctx.oscCanvas = oscCanvas.getContext("2d");
+
+        var freqGraphCanvas = document.querySelector("#freqGraph");
+        freqGraphCanvas.width = graphics.FREQ_WIDTH;
+        freqGraphCanvas.height = graphics.FREQ_HEIGHT;
+        ctx.freqGraph = freqGraphCanvas.getContext("2d");
 
         var gainCanvas = document.querySelector("#gainMeter");
         gainCanvas.width = graphics.GAIN_METER_WIDTH;
@@ -74,7 +77,6 @@
 
             nodes.recordedLoop.connect(ctx.audio.destination);
             nodes.recordedLoop.connect(nodes.analyser);
-            nodes.recordedLoop.connect(nodes.gainMonitor);
 
             nodes.recordedLoop.start();
         };
@@ -83,8 +85,17 @@
     function renderFrame() {
         requestAnimationFrame(renderFrame);
 
+        performAnalysis();
+
         graphics.drawOscilloscope(ctx.oscCanvas, nodes.analyser);
-        graphics.drawGainMeter(ctx.gainCanvas, nodes.gainMonitor);
+        graphics.drawFrequencyGraph(ctx.freqGraph, nodes.analyser);
+        graphics.drawGainMeter(ctx.gainCanvas, nodes.analyser);
+    }
+
+    function performAnalysis() {
+        var analyser = nodes.analyser;
+        analyser.getByteFrequencyData(analyser.freqData);
+        analyser.getByteTimeDomainData(analyser.timeData);
     }
 
     function handleMicRejection(err) {
